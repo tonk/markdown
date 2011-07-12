@@ -1,0 +1,41 @@
+This is a patched version of MarkDown, is a text-to-HTML conversion tool for
+web writers.
+
+It's developed by John Gruber (http://daringfireball.net/projects/markdown/).
+
+My changes are:
+
+* I've added an extra URL option.
+  When typing: [URL]{http://....} the URL will be opened in a new window
+
+* Smiley support. The following smilies are supported:
+	:)		smiley.gif
+	:-)		smiley.gif
+	:(		sad.gif
+	:-(		sad.gif
+	;)		wink.gif
+	;-)		wink.gif
+	:D		grin.gif
+	:cry:		cry.gif
+	:laugh:		laugh.gif
+	:P		tongue.gif
+	:-P		tongue.gif
+	:*		kiss.gif
+	:-*		kiss.gif
+	8)		cool.gif
+	8-)		cool.gif
+	:huh:		huh.gif
+	:O		shocked.gif
+	:-O		shocked.gif
+	:roll:		rolleyes.gif
+	:embarassed:	embarassed.gif
+	:angry:		angry.gif
+	:cheesey:	cheesy.gif
+	:sealed:	lipsrsealed.gif
+	:X		lipsrsealed.gif
+	:-X		lipsrsealed.gif
+
+Place the 'smilies' directory in the '/images' of your webserver.
+
+# $Id:: README 1 2011-03-09 14:23:46 tonk                                   $:
+# $Revision:: 1                                                             $:

@@ -18,6 +18,5 @@ install:
 	install -p -m 755 markdown		/home/tonk/bin
 	#
 	install -p -m 644 markdown		/home/tonk/tonkersten/files/markdown
-	install -p -m 755 -d smilies	/home/tonk/tonkersten/files/markdown/smilies
-	install -p -m 644 smilies/*		/home/tonk/tonkersten/files/markdown/smilies
+	install -p -m 644 smilies.tgz	/home/tonk/tonkersten/files/markdown/smilies
 	install -p -m 644 README		/home/tonk/tonkersten/files/markdown
