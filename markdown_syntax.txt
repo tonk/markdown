@@ -243,6 +243,15 @@ determines the header level.) :
 
     ### This is an H3 ######
 
+Also the RDoc style headers are supported, using `=` instead of
+`#`.
+
+    = This is an H1 =
+
+    == This is an H2 ==
+
+    === This is an H3 ======
+
 
 <h3 id="blockquote">Blockquotes</h3>
 
@@ -895,5 +904,5 @@ Markdown provides backslash escapes for the following characters:
     .   dot
     !   exclamation mark
 
-# $Id:: markdown_syntax.txt 2 2011-07-08 12:55:59 tonk                      $:
-# $Revision:: 2                                                             $:
+# $Id:: markdown_syntax.txt 3 2012-05-16 09:38:59 tonk                      $:
+# $Revision:: 3                                                             $:
