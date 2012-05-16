@@ -1,14 +1,14 @@
 #!/usr/bin/perl
-
+# vi: set sw=4 ts=4 ai:
 #
 # Markdown -- A text-to-HTML conversion tool for web writers
 #
 # Copyright (c) 2004 John Gruber
 # <http://daringfireball.net/projects/markdown/>
 #
-# Patched a little by Ton Kersten
-# $Id:: README 1 2011-03-09 14:23:46 tonk                                   $:
-# $Revision:: 1                                                             $:
+# Patched a little/lot by Ton Kersten
+# $Id: markdown 2 2012-05-16 09:31:12 tonk $
+# $Revision: 2 $
 
 package Markdown;
 require 5.006_000;
@@ -17,7 +17,7 @@ use warnings;
 
 use Digest::MD5 qw(md5_hex);
 use vars qw($VERSION);
-$VERSION = '1.1.0';
+$VERSION = '1.2.1';
 # Tue 14 Apr 2009
 
 ## Disabled; causes problems under Perl 5.6.1:
@@ -28,7 +28,7 @@ $VERSION = '1.1.0';
 #
 # Global default settings:
 #
-my $g_empty_element_suffix = " />";     # Change to ">" for HTML output
+my $g_empty_element_suffix = " />";	 # Change to ">" for HTML output
 my $g_tab_width = 4;
 
 
@@ -80,21 +80,21 @@ sub story {
 	my($pkg, $path, $filename, $story_ref, $title_ref, $body_ref) = @_;
 
 	if ( (! $g_blosxom_use_meta) or
-	     (defined($meta::markup) and ($meta::markup =~ /^\s*markdown\s*$/i))
-	     ){
+		 (defined($meta::markup) and ($meta::markup =~ /^\s*markdown\s*$/i))
+		 ){
 			$$body_ref  = Markdown($$body_ref);
-     }
-     1;
+	}
+	1;
 }
 
 
 #### Movable Type plug-in interface #####################################
 eval {require MT};  # Test to see if we're running in MT.
 unless ($@) {
-    require MT;
-    import  MT;
-    require MT::Template::Context;
-    import  MT::Template::Context;
+	require MT;
+	import  MT;
+	require MT::Template::Context;
+	import  MT::Template::Context;
 
 	eval {require MT::Plugin};  # Test to see if we're running >= MT 3.0.
 	unless ($@) {
@@ -124,14 +124,14 @@ unless ($@) {
 	});
 
 	MT->add_text_filter('markdown' => {
-		label     => 'Markdown',
-		docs      => 'http://daringfireball.net/projects/markdown/',
+		label	 => 'Markdown',
+		docs	  => 'http://daringfireball.net/projects/markdown/',
 		on_format => sub {
 			my $text = shift;
 			my $ctx  = shift;
 			my $raw  = 0;
-		    if (defined $ctx) {
-		    	my $output = $ctx->stash('markdown_output');
+			if (defined $ctx) {
+				my $output = $ctx->stash('markdown_output');
 				if (defined $output  &&  $output =~ m/^html/i) {
 					$g_empty_element_suffix = ">";
 					$ctx->stash('markdown_output', '');
@@ -160,8 +160,8 @@ unless ($@) {
 
 	if ($smartypants) {
 		MT->add_text_filter('markdown_with_smartypants' => {
-			label     => 'Markdown With SmartyPants',
-			docs      => 'http://daringfireball.net/projects/markdown/',
+			label	 => 'Markdown With SmartyPants',
+			docs	  => 'http://daringfireball.net/projects/markdown/',
 			on_format => sub {
 				my $text = shift;
 				my $ctx  = shift;
@@ -184,9 +184,9 @@ else {
 #### BBEdit/command-line text filter interface ##########################
 # Needs to be hidden from MT (and Blosxom when running in static mode).
 
-    # We're only using $blosxom::version once; tell Perl not to warn us:
+	# We're only using $blosxom::version once; tell Perl not to warn us:
 	no warnings 'once';
-    unless ( defined($blosxom::version) ) {
+	unless ( defined($blosxom::version) ) {
 		use warnings;
 
 		#### Check for command-line switches: #################
@@ -216,11 +216,11 @@ else {
 		#### Process incoming text: ###########################
 		my $text;
 		{
-			local $/;               # Slurp the whole file
+			local $/;			   # Slurp the whole file
 			$text = <>;
 		}
-        print Markdown($text);
-    }
+		print Markdown($text);
+	}
 }
 
 
@@ -438,6 +438,7 @@ sub _RunBlockGamut {
 
 	$text = _DoLists($text);
 
+	$text = _DoFencedCodeBlocks($text);
 	$text = _DoCodeBlocks($text);
 
 	$text = _DoBlockQuotes($text);
@@ -461,6 +462,7 @@ sub _RunSpanGamut {
 #
 	my $text = shift;
 
+	$text = _DoSourceCodeSpans($text);
 	$text = _DoCodeSpans($text);
 
 	$text = _EscapeSpecialChars($text);
@@ -529,24 +531,24 @@ sub _DoAnchors {
 	$text =~ s{
 		(					# wrap whole match in $1
 		  \[
-		    ($g_nested_brackets)	# link text = $2
+			($g_nested_brackets)	# link text = $2
 		  \]
 
 		  [ ]?				# one optional space
 		  (?:\n[ ]*)?		# one optional newline followed by spaces
 
 		  \[
-		    (.*?)		# id = $3
+			(.*?)		# id = $3
 		  \]
 		)
 	}{
 		my $result;
 		my $whole_match = $1;
 		my $link_text   = $2;
-		my $link_id     = lc $3;
+		my $link_id	 = lc $3;
 
 		if ($link_id eq "") {
-			$link_id = lc $link_text;     # for shortcut links like [this][].
+			$link_id = lc $link_text;	 # for shortcut links like [this][].
 		}
 
 		if (defined $g_urls{$link_id}) {
@@ -569,29 +571,29 @@ sub _DoAnchors {
 	}xsge;
 
 	#
-	# TonK: Next, handle reference-style links: [link text] {id}
+	# TonK: Next, handle reference-style links: [link text]{id}
 	#
 	$text =~ s{
-		(					# wrap whole match in $1
+		(							# wrap whole match in $1
 		  \[
-		    ($g_nested_brackets)	# link text = $2
+			($g_nested_brackets)	# link text = $2
 		  \]
 
-		  [ ]?				# one optional space
-		  (?:\n[ ]*)?		# one optional newline followed by spaces
+		  [ ]?						# one optional space
+		  (?:\n[ ]*)?				# one optional newline followed by spaces
 
 		  \{
-		    (.*?)		# id = $3
+			(.*?)					# id = $3
 		  \}
 		)
 	}{
 		my $result;
 		my $whole_match = $1;
 		my $link_text   = $2;
-		my $link_id     = lc $3;
+		my $link_id	 = lc $3;
 
 		if ($link_id eq "") {
-			$link_id = lc $link_text;     # for shortcut links like [this][].
+			$link_id = lc $link_text;	 # for shortcut links like [this][].
 		}
 
 		if (defined $g_urls{$link_id}) {
@@ -620,7 +622,7 @@ sub _DoAnchors {
 	$text =~ s{
 		(				# wrap whole match in $1
 		  \[
-		    ($g_nested_brackets)	# link text = $2
+			($g_nested_brackets)	# link text = $2
 		  \]
 		  \(			# literal paren
 		  	[ \t]*
@@ -662,7 +664,7 @@ sub _DoAnchors {
 	$text =~ s{
 		(				# wrap whole match in $1
 		  \[
-		    ($g_nested_brackets)	# link text = $2
+			($g_nested_brackets)	# link text = $2
 		  \]
 		  \{			# literal for external links
 		  	[ \t]*
@@ -715,25 +717,25 @@ sub _DoImages {
 	$text =~ s{
 		(				# wrap whole match in $1
 		  !\[
-		    (.*?)		# alt text = $2
+			(.*?)		# alt text = $2
 		  \]
 
 		  [ ]?				# one optional space
 		  (?:\n[ ]*)?		# one optional newline followed by spaces
 
 		  \[
-		    (.*?)		# id = $3
+			(.*?)		# id = $3
 		  \]
 
 		)
 	}{
 		my $result;
 		my $whole_match = $1;
-		my $alt_text    = $2;
-		my $link_id     = lc $3;
+		my $alt_text	= $2;
+		my $link_id	 = lc $3;
 
 		if ($link_id eq "") {
-			$link_id = lc $alt_text;     # for shortcut links like ![this][].
+			$link_id = lc $alt_text;	 # for shortcut links like ![this][].
 		}
 
 		$alt_text =~ s/"/&quot;/g;
@@ -765,7 +767,7 @@ sub _DoImages {
 	$text =~ s{
 		(				# wrap whole match in $1
 		  !\[
-		    (.*?)		# alt text = $2
+			(.*?)		# alt text = $2
 		  \]
 		  \(			# literal paren
 		  	[ \t]*
@@ -782,7 +784,7 @@ sub _DoImages {
 	}{
 		my $result;
 		my $whole_match = $1;
-		my $alt_text    = $2;
+		my $alt_text	= $2;
 		my $url	  		= $3;
 		my $title		= '';
 		if (defined($6)) {
@@ -790,7 +792,7 @@ sub _DoImages {
 		}
 
 		$alt_text =~ s/"/&quot;/g;
-		$title    =~ s/"/&quot;/g;
+		$title	=~ s/"/&quot;/g;
 		$url =~ s! \* !$g_escape_table{'*'}!gx;		# We've got to encode these to avoid
 		$url =~ s!  _ !$g_escape_table{'_'}!gx;		# conflicting with italics/bold.
 		$result = "<img src=\"$url\" alt=\"$alt_text\"";
@@ -846,6 +848,24 @@ sub _DoHeaders {
 			"<h$h_level>"  .  _RunSpanGamut($2)  .  "</h$h_level>\n\n";
 		}egmx;
 
+	# rdoc-style headers:
+	#	= Header 1
+	#	== Header 2
+	#	== Header 2 with closing hashes ==
+	#	...
+	#	====== Header 6
+	#
+	$text =~ s{
+			^(\={1,6})	# $1 = string of ='s
+			[ \t]*
+			(.+?)		# $2 = Header text
+			[ \t]*
+			\=*			# optional closing ='s (not counted)
+			\n+
+		}{
+			my $h_level = length($1);
+			"<h$h_level>"  .  _RunSpanGamut($2)  .  "</h$h_level>\n\n";
+		}egmx;
 	return $text;
 }
 
@@ -1015,10 +1035,10 @@ sub _DoCodeBlocks {
 
 	$text =~ s{
 			(?:\n\n|\A)
-			(	            # $1 = the code block -- one or more lines, starting with a space/tab
+			(				# $1 = the code block -- one or more lines, starting with a space/tab
 			  (?:
-			    (?:[ ]{$g_tab_width} | \t)  # Lines must start with a tab or a tab-width of spaces
-			    .*\n+
+				(?:[ ]{$g_tab_width} | \t)  # Lines must start with a tab or a tab-width of spaces
+				.*\n+
 			  )+
 			)
 			((?=^[ ]{0,$g_tab_width}\S)|\Z)	# Lookahead for non-space at line-start, or end of doc
@@ -1040,6 +1060,60 @@ sub _DoCodeBlocks {
 }
 
 
+sub _DoFencedCodeBlocks {
+#
+# Adding the fenced code block syntax to regular Markdown:
+#
+# ~~~
+# Code block
+# ~~~
+#
+	my $text = shift;
+
+	$text =~ s{
+			(?:\n|\A)
+			# 1: Opening marker
+			(
+				~{3,} # Marker: three tilde or more.
+			)
+			# 2: Optional source type marker
+			\.*
+			(
+				[a-zA-Z0-9]+
+			)
+			[ ]* \n # Whitespace and newline following marker.
+
+			# 3: Content
+			(
+				(?>
+					(?!\1[ \t]*\n)  # Not a closing marker.
+					.*\n+
+				)+
+			)
+
+			# Closing marker.
+			\1[ \t]*\n
+	}{
+		my $tag = $2;
+		my $codeblock = $3;
+		my $result; # return value
+
+		$codeblock = _EncodeCode($codeblock);
+		$codeblock =~ s/\A\n+//; # trim leading newlines
+		$codeblock =~ s/\s+\z//; # trim trailing whitespace
+
+		if ($tag) {
+			$result = "\n\n<code><pre class=\"sh_$tag\">" . $codeblock . "\n</pre></code>\n\n";
+		} else {
+			$result = "\n\n<code><pre>" . $codeblock . "\n</pre></code>\n\n";
+		}
+		$result;
+		}egmx;
+
+	return $text;
+}
+
+
 sub _DoCodeSpans {
 #
 # 	*	Backtick quotes are used for <code></code> spans.
@@ -1047,11 +1121,11 @@ sub _DoCodeSpans {
 # 	*	You can use multiple backticks as the delimiters if you want to
 # 		include literal backticks in the code span. So, this input:
 #
-#         Just type ``foo `bar` baz`` at the prompt.
+#		 Just type ``foo `bar` baz`` at the prompt.
 #
-#     	Will translate to:
+#	 	Will translate to:
 #
-#         <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
+#		 <p>Just type <code>foo `bar` baz</code> at the prompt.</p>
 #
 #		There's no arbitrary limit to the number of backticks you
 #		can use as delimters. If you need three consecutive backticks
@@ -1059,11 +1133,11 @@ sub _DoCodeSpans {
 #
 #	*	You can use spaces to get literal backticks at the edges:
 #
-#         ... type `` `bar` `` ...
+#		 ... type `` `bar` `` ...
 #
-#     	Turns to:
+#	 	Turns to:
 #
-#         ... type <code>`bar`</code> ...
+#		 ... type <code>`bar`</code> ...
 #
 
 	my $text = shift;
@@ -1085,6 +1159,38 @@ sub _DoCodeSpans {
 	return $text;
 }
 
+sub _DoSourceCodeSpans {
+#
+# 	*	Three backtick quotes are used for <pre class="brush: xx"></pre> spans.
+#
+	my $text = shift;
+
+	$text =~ s{
+			(```)(.+?)
+			(				# $1 = the code block -- one or more lines, starting with a space/tab
+			  (?:
+				(.*)
+				.*\n+
+			  )+
+			)
+			((?=```\S)|\Z)	# Lookahead for non-space at line-start, or end of doc
+		}{
+			my $codeblock = $1;
+			my $result; # return value
+
+			$codeblock = _EncodeCode(_Outdent($codeblock));
+			$codeblock = _Detab($codeblock);
+			$codeblock =~ s/\A\n+//; # trim leading newlines
+			$codeblock =~ s/\s+\z//; # trim trailing whitespace
+
+			$result = "\n\n<pre class=\"$2\"><code>" . $codeblock . "\n</code></pre>\n\n";
+
+			$result;
+		}egmx;
+
+	return $text;
+}
+
 
 sub _EncodeCode {
 #
@@ -1092,7 +1198,7 @@ sub _EncodeCode {
 # The point is that in code, these characters are literals,
 # and lose their special Markdown meanings.
 #
-    local $_ = shift;
+	local $_ = shift;
 
 	# Encode all ampersands; HTML entities are not
 	# entities within a Markdown code span.
@@ -1102,11 +1208,10 @@ sub _EncodeCode {
 	# (Blosxom interpolates Perl variables in article bodies.)
 	{
 		no warnings 'once';
-    	if (defined($blosxom::version)) {
-    		s/\$/&#036;/g;
-    	}
-    }
-
+		if (defined($blosxom::version)) {
+			s/\$/&#036;/g;
+		}
+	}
 
 	# Do the angle bracket song and dance:
 	s! <  !&lt;!gx;
@@ -1146,7 +1251,7 @@ sub _DoBlockQuotes {
 		  (								# Wrap whole match in $1
 			(
 			  ^[ \t]*>[ \t]?			# '>' at the start of a line
-			    .+\n					# rest of the first line
+				.+\n					# rest of the first line
 			  (.+\n)*					# subsequent consecutive lines
 			  \n*						# blanks
 			)+
@@ -1231,29 +1336,29 @@ sub _EncodeAmpsAndAngles {
 sub _EncodeBackslashEscapes {
 #
 #   Parameter:  String.
-#   Returns:    The string, with after processing the following backslash
-#               escape sequences.
+#   Returns:	The string, with after processing the following backslash
+#			   escape sequences.
 #
-    local $_ = shift;
+	local $_ = shift;
 
-    s! \\\\  !$g_escape_table{'\\'}!gx;		# Must process escaped backslashes first.
-    s! \\`   !$g_escape_table{'`'}!gx;
-    s! \\\*  !$g_escape_table{'*'}!gx;
-    s! \\_   !$g_escape_table{'_'}!gx;
-    s! \\\{  !$g_escape_table{'{'}!gx;
-    s! \\\}  !$g_escape_table{'}'}!gx;
-    s! \\\[  !$g_escape_table{'['}!gx;
-    s! \\\]  !$g_escape_table{']'}!gx;
-    s! \\\(  !$g_escape_table{'('}!gx;
-    s! \\\)  !$g_escape_table{')'}!gx;
-    s! \\>   !$g_escape_table{'>'}!gx;
-    s! \\\#  !$g_escape_table{'#'}!gx;
-    s! \\\+  !$g_escape_table{'+'}!gx;
-    s! \\\-  !$g_escape_table{'-'}!gx;
-    s! \\\.  !$g_escape_table{'.'}!gx;
-    s{ \\!  }{$g_escape_table{'!'}}gx;
+	s! \\\\  !$g_escape_table{'\\'}!gx;		# Must process escaped backslashes first.
+	s! \\`   !$g_escape_table{'`'}!gx;
+	s! \\\*  !$g_escape_table{'*'}!gx;
+	s! \\_   !$g_escape_table{'_'}!gx;
+	s! \\\{  !$g_escape_table{'{'}!gx;
+	s! \\\}  !$g_escape_table{'}'}!gx;
+	s! \\\[  !$g_escape_table{'['}!gx;
+	s! \\\]  !$g_escape_table{']'}!gx;
+	s! \\\(  !$g_escape_table{'('}!gx;
+	s! \\\)  !$g_escape_table{')'}!gx;
+	s! \\>   !$g_escape_table{'>'}!gx;
+	s! \\\#  !$g_escape_table{'#'}!gx;
+	s! \\\+  !$g_escape_table{'+'}!gx;
+	s! \\\-  !$g_escape_table{'-'}!gx;
+	s! \\\.  !$g_escape_table{'.'}!gx;
+	s{ \\!  }{$g_escape_table{'!'}}gx;
 
-    return $_;
+	return $_;
 }
 
 
@@ -1265,7 +1370,7 @@ sub _DoAutoLinks {
 	# Email addresses: <address@domain.foo>
 	$text =~ s{
 		<
-        (?:mailto:)?
+		(?:mailto:)?
 		(
 			[-.\w]+
 			\@
@@ -1289,8 +1394,8 @@ sub _EncodeEmailAddress {
 #		the hopes of foiling most address harvesting spam bots. E.g.:
 #
 #	  <a href="&#x6D;&#97;&#105;&#108;&#x74;&#111;:&#102;&#111;&#111;&#64;&#101;
-#       x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;">&#102;&#111;&#111;
-#       &#64;&#101;x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;</a>
+#	   x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;">&#102;&#111;&#111;
+#	   &#64;&#101;x&#x61;&#109;&#x70;&#108;&#x65;&#x2E;&#99;&#111;&#109;</a>
 #
 #	Based on a filter by Matthew Wickline, posted to the BBEdit-Talk
 #	mailing list: <http://tinyurl.com/yu7ue>
@@ -1300,9 +1405,9 @@ sub _EncodeEmailAddress {
 
 	srand;
 	my @encode = (
-		sub { '&#' .                 ord(shift)   . ';' },
+		sub { '&#' .				 ord(shift)   . ';' },
 		sub { '&#x' . sprintf( "%X", ord(shift) ) . ';' },
-		sub {                            shift          },
+		sub {							shift		  },
 	);
 
 	$addr = "mailto:" . $addr;
@@ -1341,12 +1446,12 @@ sub _UnescapeSpecialChars {
 	while( my($char, $hash) = each(%g_escape_table) ) {
 		$text =~ s/$hash/$char/g;
 	}
-    return $text;
+	return $text;
 }
 
 sub _DoSmilies {
 #
-# Change the smily ascii's to picts
+# TonK: Change the smily ascii's to picts
 #
 	my $text = shift;
 
@@ -1384,41 +1489,41 @@ sub _DoSmilies {
 sub _TokenizeHTML {
 #
 #   Parameter:  String containing HTML markup.
-#   Returns:    Reference to an array of the tokens comprising the input
-#               string. Each token is either a tag (possibly with nested,
-#               tags contained therein, such as <a href="<MTFoo>">, or a
-#               run of text between tags. Each element of the array is a
-#               two-element array; the first is either 'tag' or 'text';
-#               the second is the actual value.
+#   Returns:	Reference to an array of the tokens comprising the input
+#			   string. Each token is either a tag (possibly with nested,
+#			   tags contained therein, such as <a href="<MTFoo>">, or a
+#			   run of text between tags. Each element of the array is a
+#			   two-element array; the first is either 'tag' or 'text';
+#			   the second is the actual value.
 #
 #
 #   Derived from the _tokenize() subroutine from Brad Choate's MTRegex plugin.
-#       <http://www.bradchoate.com/past/mtregex.php>
+#	   <http://www.bradchoate.com/past/mtregex.php>
 #
 
-    my $str = shift;
-    my $pos = 0;
-    my $len = length $str;
-    my @tokens;
+	my $str = shift;
+	my $pos = 0;
+	my $len = length $str;
+	my @tokens;
 
-    my $depth = 6;
-    my $nested_tags = join('|', ('(?:<[a-z/!$](?:[^<>]') x $depth) . (')*>)' x  $depth);
-    my $match = qr/(?s: <! ( -- .*? -- \s* )+ > ) |  # comment
-                   (?s: <\? .*? \?> ) |              # processing instruction
-                   $nested_tags/ix;                   # nested tags
+	my $depth = 6;
+	my $nested_tags = join('|', ('(?:<[a-z/!$](?:[^<>]') x $depth) . (')*>)' x  $depth);
+	my $match = qr/(?s: <! ( -- .*? -- \s* )+ > ) |  # comment
+					(?s: <\? .*? \?> ) |			  # processing instruction
+					$nested_tags/ix;				   # nested tags
 
-    while ($str =~ m/($match)/g) {
-        my $whole_tag = $1;
-        my $sec_start = pos $str;
-        my $tag_start = $sec_start - length $whole_tag;
-        if ($pos < $tag_start) {
-            push @tokens, ['text', substr($str, $pos, $tag_start - $pos)];
-        }
-        push @tokens, ['tag', $whole_tag];
-        $pos = pos $str;
-    }
-    push @tokens, ['text', substr($str, $pos, $len - $pos)] if $pos < $len;
-    \@tokens;
+	while ($str =~ m/($match)/g) {
+		my $whole_tag = $1;
+		my $sec_start = pos $str;
+		my $tag_start = $sec_start - length $whole_tag;
+		if ($pos < $tag_start) {
+			push @tokens, ['text', substr($str, $pos, $tag_start - $pos)];
+		}
+		push @tokens, ['tag', $whole_tag];
+		$pos = pos $str;
+	}
+	push @tokens, ['text', substr($str, $pos, $len - $pos)] if $pos < $len;
+	\@tokens;
 }
 
 
@@ -1460,7 +1565,7 @@ B<Markdown>
 =head1 SYNOPSIS
 
 B<Markdown.pl> [ B<--html4tags> ] [ B<--version> ] [ B<-shortversion> ]
-    [ I<file> ... ]
+	[ I<file> ... ]
 
 
 =head1 DESCRIPTION
@@ -1477,7 +1582,7 @@ HTML tags (like <div> and <table> as well).
 
 For more information about Markdown's syntax, see:
 
-    http://daringfireball.net/projects/markdown/
+	http://daringfireball.net/projects/markdown/
 
 
 =head1 OPTIONS
@@ -1493,11 +1598,11 @@ Use "--" to end switch parsing. For example, to open a file named "-z", use:
 
 Use HTML 4 style for empty element tags, e.g.:
 
-    <br>
+	<br>
 
 instead of Markdown's default XHTML style tags, e.g.:
 
-    <br />
+	<br />
 
 
 =item B<-v>, B<--version>
@@ -1519,7 +1624,7 @@ Display the short-form version number.
 To file bug reports or feature requests (other than topics listed in the
 Caveats section above) please send email to:
 
-    support@daringfireball.net
+	support@daringfireball.net
 
 Please include with your report: (1) the example input; (2) the output
 you expected; (3) the output Markdown actually produced.
@@ -1528,6 +1633,8 @@ you expected; (3) the output Markdown actually produced.
 =head1 VERSION HISTORY
 
 See the readme file for detailed release notes for this version.
+
+1.1.1 - 14 Apr 2012 (TonK)
 
 1.1.0 - 14 Apr 2009 (TonK)
 
@@ -1538,17 +1645,17 @@ See the readme file for detailed release notes for this version.
 
 =head1 AUTHOR
 
-    John Gruber
-    http://daringfireball.net
+	John Gruber
+	http://daringfireball.net
 
-    PHP port and other contributions by Michel Fortin
-    http://michelf.com
+	PHP port and other contributions by Michel Fortin
+	http://michelf.com
 
-    Ton Kersten
-    http://tonkersten.com
-    Option to create an external link (starts in a new window
-    or tab)
-    Syntax: [url text]{website url}
+	Ton Kersten
+	http://tonkersten.com
+	Option to create an external link (starts in a new window
+	or tab)
+	Syntax: [url text]{website url}
 
 
 =head1 COPYRIGHT AND LICENSE
