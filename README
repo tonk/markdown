@@ -37,5 +37,7 @@ My changes are:
 
 Place the 'smilies' directory in the '/images' of your webserver.
 
-# $Id:: README 1 2011-03-09 14:23:46 tonk                                   $:
-# $Revision:: 1                                                             $:
+* Added RDoc style headers. These use `=` instead of `#`.
+
+# $Id:: README 2 2012-05-16 09:50:15 tonk                                   $:
+# $Revision:: 2                                                             $:
